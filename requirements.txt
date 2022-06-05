@@ -1,0 +1,13 @@
+scanpy
+numpy
+pandas
+louvain
+python-igraph
+openpyxl
+gseapy
+ipywidgets
+cmapPy
+multiprocess
+harmonypy
+kaplanmeier
+lifelines
