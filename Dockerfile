@@ -18,6 +18,10 @@ RUN unzip /opt/scMatch/refDB/FANTOM5/9606_symbol.csv.zip -d /opt/scMatch/refDB/F
 RUN sed -i 's/\.ix/.loc/g' /opt/scMatch/scMatch.py
 RUN sed -i 's/loc\[commonRows, ].fillna(0\.0)/reindex(commonRows, axis="index", fill_value=0.0)/g' /opt/scMatch/scMatch.py
 
+## survival analysis
+RUN wget https://figshare.com/ndownloader/files/35596748 -O data/TCGA.zip
+RUN unzip data/TCGA.zip
+
 ## CaDRReS-Sc
 RUN git clone https://github.com/CSB5/CaDRReS-Sc.git /opt/CaDRReS-Sc
 RUN wget https://www.dropbox.com/s/3v576mspw5yewbm/GDSC_exp.tsv -O /opt/CaDRReS-Sc/data/GDSC/GDSC_exp.tsv
