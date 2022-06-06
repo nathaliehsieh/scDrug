@@ -21,6 +21,7 @@ RUN sed -i 's/loc\[commonRows, ].fillna(0\.0)/reindex(commonRows, axis="index", 
 ## survival analysis
 RUN wget https://figshare.com/ndownloader/files/35596748 -O data/TCGA.zip
 RUN unzip data/TCGA.zip
+RUN rm data/TCGA.zip
 
 ## CaDRReS-Sc
 RUN git clone https://github.com/CSB5/CaDRReS-Sc.git /opt/CaDRReS-Sc
