@@ -4,14 +4,8 @@
 
 The example data is composed of a random 10% subdata from [GSE156625: Onco-fetal reprogramming of endothelial cells drives immunosuppressive macrophages in Hepatocellular Carcinoma (scRNA-seq)](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE156625).
 
-Before going through the steps in the scDrug, run the following commands to unzip the data files and create the output directory `write` under the `example` folder. 
+Before going through the steps in the scDrug, download and uncompress the example data `data.zip ` from [figshare](https://figshare.com/articles/dataset/example_data_zip/20003180) and put the files under the `example` folder. 
 
-```
-cd example
-unzip data/10x_mtx.zip
-unzip data/metadata.csv.zip
-mkdir write
-```
 
 
 ### Single-Cell Data Analysis
