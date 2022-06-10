@@ -19,7 +19,7 @@ RUN sed -i 's/\.ix/.loc/g' /opt/scMatch/scMatch.py
 RUN sed -i 's/loc\[commonRows, ].fillna(0\.0)/reindex(commonRows, axis="index", fill_value=0.0)/g' /opt/scMatch/scMatch.py
 
 ## survival analysis
-RUN wget https://figshare.com/ndownloader/files/35596748 -O data/TCGA.zip
+RUN wget https://figshare.com/ndownloader/files/35612942 -O data/TCGA.zip
 RUN unzip data/TCGA.zip
 RUN rm data/TCGA.zip
 
