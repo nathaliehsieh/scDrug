@@ -450,7 +450,7 @@ if args.annotation:
             scMatch_candidate_df.iloc[:, i] = [x.split(',',1)[0].split(':',1)[0] for x in scMatch_candidate_df.iloc[:, i]]
     dict_candidates = {}
     for i in range(int(len(scMatch_candidate_df.columns)/2)):
-        candidates = list(set(scMatch_candidate_df.iloc[:5, i*2]))
+        candidates = list(dict.fromkeys(scMatch_candidate_df.iloc[:5, i*2]))
         idx = 5
         while len(candidates) < 5:
             cell = scMatch_candidate_df.iloc[idx, i*2]
