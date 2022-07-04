@@ -122,6 +122,7 @@ python3 single_cell_analysis.py -f h5ad --input scanpyobj.h5ad --clusters CLUSTE
 
 ```
 usage: drug_response_prediction.py [-h] -i INPUT [-o OUTPUT] [-c CLUSTERS]
+                                   [-m MODEL]
 
 Drug response prediction
 
@@ -132,9 +133,11 @@ optional arguments:
   -o OUTPUT, --output OUTPUT
                         path to output directory, default='./'
   -c CLUSTERS, --clusters CLUSTERS
-                        perform IC50 prediction on specified clusters, e.g. '1,3,8,9', default='All'
-  -m MODEL, --model MODEL_NAME
-                        the sensitivity screening is from GDSC ic50/PRISM auc, e.g. GDSC, PRISM, default='GDSC'
+                        perform IC50 prediction on specified clusters, e.g.
+                        '1,3,8,9', default='All'
+  -m MODEL, --model MODEL
+                        the sensitivity screening is from GDSC ic50/PRISM auc,
+                        e.g. GDSC, PRISM, default='PRISM'
 ```
 
 - Predict drug response on specified clusters (here for default all clusters) with **Drug Response Prediction**.
