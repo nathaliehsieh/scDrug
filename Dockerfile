@@ -25,12 +25,12 @@ RUN rm data/TCGA.zip
 
 ## CaDRReS-Sc
 RUN git clone https://github.com/CSB5/CaDRReS-Sc.git /opt/CaDRReS-Sc
-RUN wget https://www.dropbox.com/s/3v576mspw5yewbm/GDSC_exp.tsv -O /opt/CaDRReS-Sc/data/GDSC/GDSC_exp.tsv
+RUN wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=19d5kIP2YlChqLFZZo4aWoU2maspa9oe1' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=19d5kIP2YlChqLFZZo4aWoU2maspa9oe1" -O /opt/CaDRReS-Sc/data/GDSC/GDSC_exp.tsv && rm -rf /tmp/cookies.txt
 RUN mkdir -p /opt/CaDRReS-Sc/data/CCLE
-RUN wget https://ndownloader.figshare.com/files/29124747 -O /opt/CaDRReS-Sc/data/CCLE/CCLE_expression.csv
+RUN wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=19lU6RnCjx57Oj0UZlpIwieHYTYdxc7MN' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=19lU6RnCjx57Oj0UZlpIwieHYTYdxc7MN" -O /opt/CaDRReS-Sc/data/CCLE/CCLE_expression.csv  && rm -rf /tmp/cookies.txt
 RUN mkdir -p /opt/CaDRReS-Sc/preprocessed_data/PRISM
-RUN wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1BdW-3oBp8q5hTTjB3iNysqSf8GNkKGH6' -O /opt/CaDRReS-Sc/preprocessed_data/PRISM/PRISM_drug_info.csv
-RUN wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1PGdLJonMBldTYihruXug-LgyoU7PQpAn' -O /opt/CaDRReS-Sc/preprocessed_data/PRISM/feature_genes.txt
+RUN wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1AhjNbT88--PmG8qZSOcF_C2tYm-FoC2c' -O /opt/CaDRReS-Sc/preprocessed_data/PRISM/PRISM_drug_info.csv
+RUN wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_TCD-OO-l1dsnwLoLlb8eD92grE6_ZPU' -O /opt/CaDRReS-Sc/preprocessed_data/PRISM/feature_genes.txt
 
 RUN sed -i 's/import tensorflow as tf/import tensorflow.compat.v1 as tf\ntf.disable_v2_behavior()/g' /opt/CaDRReS-Sc/cadrres_sc/model.py
 RUN sed -i 's/import tensorflow\.python\.util\.deprecation as deprecation/from tensorflow.python.util import deprecation/g' /opt/CaDRReS-Sc/cadrres_sc/model.py
