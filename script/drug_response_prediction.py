@@ -156,10 +156,10 @@ class Drug_Response:
             self.pred_auc_df.columns = pd.MultiIndex.from_frame(drug_df)
             self.pred_auc_df.round(3).to_csv(os.path.join(args.output, 'PRISM_prediction.csv'))
     
-    def draw_plot(self, df, name='', figsize=()):
+    def draw_plot(self, df, n_drug=10, name='', figsize=()):
         if args.model == 'GDSC':
             fig, ax = plt.subplots(figsize=figsize) 
-            sns.heatmap(df.iloc[:,:-1], cmap='Blues', \
+            sns.heatmap(df.iloc[:n_drug,:-1], cmap='Blues', \
                         linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': 'Drug Sensitivity'}, ax=ax)
             ax.set_xlabel('Cluster', fontsize=20)
             ax.set_ylabel('Drug', fontsize=20)
@@ -172,7 +172,7 @@ class Drug_Response:
 
         else:
             fig, ax = plt.subplots(figsize=figsize) 
-            sns.heatmap(df.iloc[:,:-1], cmap='Blues', \
+            sns.heatmap(df.iloc[:n_drug,:-1], cmap='Blues', \
                         linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': 'Drug Sensitivity'}, ax=ax, vmin=0, vmax=1)
             ax.set_xlabel('Cluster', fontsize=20)
             ax.set_ylabel('Drug', fontsize=20)
@@ -193,13 +193,13 @@ class Drug_Response:
             tmp_pred_kill_df = self.pred_kill_df.T
             tmp_pred_kill_df = tmp_pred_kill_df.loc[(tmp_pred_kill_df>=50).all(axis=1)]
             tmp_pred_kill_df = tmp_pred_kill_df.assign(sum=tmp_pred_kill_df.sum(axis=1)).sort_values(by='sum', ascending=False)
-            self.draw_plot(tmp_pred_kill_df, name='predicted cell death', figsize=(12,8))
+            self.draw_plot(tmp_pred_kill_df, n_drug=10, name='predicted cell death', figsize=(12,8))
 
         ## PRISM figures
         else:
             tmp_pred_auc_df = self.pred_auc_df.T
             tmp_pred_auc_df = tmp_pred_auc_df.assign(sum=tmp_pred_auc_df.sum(axis=1)).sort_values(by='sum', ascending=True)
-            self.draw_plot(tmp_pred_auc_df, name='PRISM prediction', figsize=(12,60))  
+            self.draw_plot(tmp_pred_auc_df, n_drug=10, name='PRISM prediction')  
         print('done!')  
 
 
