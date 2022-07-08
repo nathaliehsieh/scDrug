@@ -139,6 +139,8 @@ class Drug_Response:
         if args.model == 'GDSC':
             drug_df = pd.DataFrame({'Drug ID': self.drug_list, 
                                     'Drug Name': [self.drug_info_df.loc[drug_id]['Drug Name'] for drug_id in self.drug_list]})
+            self.pred_ic50_df = (self.pred_ic50_df.T-self.pred_ic50_df.min(axis=1))/(self.pred_ic50_df.max(axis=1)-self.pred_ic50_df.min(axis=1))
+            self.pred_ic50_df = self.pred_ic50_df.T
             self.pred_ic50_df.columns = pd.MultiIndex.from_frame(drug_df)
             self.pred_ic50_df.round(3).to_csv(os.path.join(args.output, 'IC50_prediction.csv'))
             self.pred_kill_df.columns = pd.MultiIndex.from_frame(drug_df)
@@ -148,17 +150,20 @@ class Drug_Response:
             drug_list  = [d for d in drug_list if d not in self.masked_drugs]
             drug_df = pd.DataFrame({'Drug ID':drug_list,
                                     'Drug Name':[self.drug_info_df.loc[d, 'name'] for d in drug_list]})
-            self.pred_auc_df = self.pred_auc_df.loc[:,drug_list]
+            self.pred_auc_df = self.pred_auc_df.loc[:,drug_list].T
             self.pred_auc_df = (self.pred_auc_df-self.pred_auc_df.min())/(self.pred_auc_df.max()-self.pred_auc_df.min())
+            self.pred_auc_df = self.pred_auc_df.T
             self.pred_auc_df.columns = pd.MultiIndex.from_frame(drug_df)
-            self.pred_auc_df.round(3).to_csv(os.path.join(args.output, 'AUC_prediction.csv'))
+            self.pred_auc_df.round(3).to_csv(os.path.join(args.output, 'PRISM_prediction.csv'))
     
     def draw_plot(self, df, name='', figsize=()):
         if args.model == 'GDSC':
             fig, ax = plt.subplots(figsize=figsize) 
             sns.heatmap(df.iloc[:,:-1], cmap='Blues', \
-                        linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': name}, ax=ax)
-            ax.set(xlabel='Cluster', ylabel='Drug')
+                        linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': 'Drug Sensitivity'}, ax=ax)
+            ax.set_xlabel('Cluster', fontsize=20)
+            ax.set_ylabel('Drug', fontsize=20)
+            ax.figure.axes[-1].yaxis.label.set_size(20)
             for _, spine in ax.spines.items():
                 spine.set_visible(True)
                 spine.set_color('lightgrey') 
@@ -168,8 +173,10 @@ class Drug_Response:
         else:
             fig, ax = plt.subplots(figsize=figsize) 
             sns.heatmap(df.iloc[:,:-1], cmap='Blues', \
-                        linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': name}, ax=ax, vmin=0, vmax=1)
-            ax.set(xlabel='Cluster', ylabel='Drug')
+                        linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': 'Drug Sensitivity'}, ax=ax, vmin=0, vmax=1)
+            ax.set_xlabel('Cluster', fontsize=20)
+            ax.set_ylabel('Drug', fontsize=20)
+            ax.figure.axes[-1].yaxis.label.set_size(20)
             for _, spine in ax.spines.items():
                 spine.set_visible(True)
                 spine.set_color('lightgrey') 
@@ -182,7 +189,7 @@ class Drug_Response:
         if args.model == 'GDSC':
             tmp_pred_ic50_df = self.pred_ic50_df.T
             tmp_pred_ic50_df = tmp_pred_ic50_df.assign(sum=tmp_pred_ic50_df.sum(axis=1)).sort_values(by='sum', ascending=True)
-            self.draw_plot(tmp_pred_ic50_df, name='predicted IC50', figsize=(12,40))
+            self.draw_plot(tmp_pred_ic50_df, name='GDSC prediction', figsize=(12,40))
             tmp_pred_kill_df = self.pred_kill_df.T
             tmp_pred_kill_df = tmp_pred_kill_df.loc[(tmp_pred_kill_df>=50).all(axis=1)]
             tmp_pred_kill_df = tmp_pred_kill_df.assign(sum=tmp_pred_kill_df.sum(axis=1)).sort_values(by='sum', ascending=False)
@@ -192,8 +199,9 @@ class Drug_Response:
         else:
             tmp_pred_auc_df = self.pred_auc_df.T
             tmp_pred_auc_df = tmp_pred_auc_df.assign(sum=tmp_pred_auc_df.sum(axis=1)).sort_values(by='sum', ascending=True)
-            self.draw_plot(tmp_pred_auc_df, name='predicted AUC', figsize=(12,60))  
-        print('done!') 
+            self.draw_plot(tmp_pred_auc_df, name='PRISM prediction', figsize=(12,60))  
+        print('done!')  
 
 
 job = Drug_Response()
+
