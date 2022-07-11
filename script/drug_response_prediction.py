@@ -157,6 +157,17 @@ class Drug_Response:
             self.pred_auc_df.round(3).to_csv(os.path.join(args.output, 'PRISM_prediction.csv'))
     
     def draw_plot(self, df, n_drug=10, name='', figsize=()):
+
+        def select_drug(df, n_drug):
+            selected_drugs = []
+            df_tmp = df.iloc[:, 1:-2].set_index('Drug Name')
+            for cluster in sorted([x for x in df_tmp.columns], key=int):
+                for drug_name in df_tmp.sort_values(by=cluster).index[:n_drug].values:
+                    if drug_name not in selected_drugs:
+                        selected_drugs.append(drug_name)
+            df_tmp = df_tmp.loc[selected_drugs, :]
+            return df_tmp
+
         if args.model == 'GDSC':
             fig, ax = plt.subplots(figsize=figsize) 
             sns.heatmap(df.iloc[:n_drug,:-1], cmap='Blues', \
@@ -171,8 +182,8 @@ class Drug_Response:
             plt.close()
 
         else:
-            fig, ax = plt.subplots(figsize=figsize) 
-            sns.heatmap(df.iloc[:n_drug,:-1], cmap='Blues', \
+            fig, ax = plt.subplots(figsize=(df.shape[1], int(n_drug*df.shape[1]/2))) 
+            sns.heatmap(select_drug(df, n_drug), cmap='Blues', \
                         linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': 'Drug Sensitivity'}, ax=ax, vmin=0, vmax=1)
             ax.set_xlabel('Cluster', fontsize=20)
             ax.set_ylabel('Drug', fontsize=20)
@@ -184,6 +195,7 @@ class Drug_Response:
             plt.close()
 
     def figure_output(self):
+
         print('Ploting...')
         ## GDSC figures
         if args.model == 'GDSC':
@@ -198,8 +210,8 @@ class Drug_Response:
         ## PRISM figures
         else:
             tmp_pred_auc_df = self.pred_auc_df.T
-            tmp_pred_auc_df = tmp_pred_auc_df.assign(sum=tmp_pred_auc_df.sum(axis=1)).sort_values(by='sum', ascending=True)
-            self.draw_plot(tmp_pred_auc_df, n_drug=10, name='PRISM prediction', figsize=(12,8))  
+            #tmp_pred_auc_df = tmp_pred_auc_df.assign(sum=tmp_pred_auc_df.sum(axis=1)).sort_values(by='sum', ascending=True)
+            self.draw_plot(tmp_pred_auc_df, n_drug=10, name='PRISM prediction')  
         print('done!')  
 
 
