@@ -160,7 +160,7 @@ class Drug_Response:
 
         def select_drug(df, n_drug):
             selected_drugs = []
-            df_tmp = df.iloc[:, 1:-2].set_index('Drug Name')
+            df_tmp = df.reset_index().set_index('Drug Name').iloc[:, 1:]
             for cluster in sorted([x for x in df_tmp.columns], key=int):
                 for drug_name in df_tmp.sort_values(by=cluster).index[:n_drug].values:
                     if drug_name not in selected_drugs:
