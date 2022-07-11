@@ -18,6 +18,7 @@ parser.add_argument('-i', '--input', required=True, help='path to input Anndata 
 parser.add_argument('-o', '--output', default='./', help='path to output directory, default=\'./\'')
 parser.add_argument('-c', '--clusters', default='All', type=str, help='perform IC50 prediction on specified clusters, e.g. \'1,3,8,9\', default=\'All\'')
 parser.add_argument('-m', '--model', default='PRISM', type=str, help='the sensitivity screening is from GDSC ic50/PRISM auc, e.g. GDSC, PRISM')
+parser.add_argument('--n_drugs', default=10, type=int, help='the number of drugs to visualize for each cluster')
 
 args = parser.parse_args()
 
@@ -211,7 +212,7 @@ class Drug_Response:
         else:
             tmp_pred_auc_df = self.pred_auc_df.T
             #tmp_pred_auc_df = tmp_pred_auc_df.assign(sum=tmp_pred_auc_df.sum(axis=1)).sort_values(by='sum', ascending=True)
-            self.draw_plot(tmp_pred_auc_df, n_drug=10, name='PRISM prediction')  
+            self.draw_plot(tmp_pred_auc_df, n_drug=args.n_drugs, name='PRISM prediction')  
         print('done!')  
 
 
