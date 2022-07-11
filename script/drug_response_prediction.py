@@ -209,7 +209,7 @@ class Drug_Response:
 
         ## PRISM figures
         else:
-            tmp_pred_auc_df = self.pred_auc_df.T.reset_index(drop=True)
+            tmp_pred_auc_df = self.pred_auc_df.T
             #tmp_pred_auc_df = tmp_pred_auc_df.assign(sum=tmp_pred_auc_df.sum(axis=1)).sort_values(by='sum', ascending=True)
             self.draw_plot(tmp_pred_auc_df, n_drug=10, name='PRISM prediction')  
         print('done!')  
