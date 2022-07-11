@@ -194,6 +194,7 @@ parser.add_argument("--cpus", default=1, type=int, help="number of CPU used for 
 parser.add_argument("--survival", action="store_true", help="perform survival analysis")
 parser.add_argument("--tcga", default='/scDrug/data/TCGA/', help="path to TCGA data")
 parser.add_argument("--id", default=None, help='Specify TCGA project id in the format "TCGA-xxxx", e.g., "TCGA-LIHC"')
+parser.add_argument("--prefix", default=None, help='Any prefix before matrix.mtx, genes.tsv and barcodes.tsv.')
 parser.add_argument("--not_treated", action="store_true", help='only consider untreated samples from TCGA for survival analysis.')
 
 args = parser.parse_args()
@@ -287,7 +288,7 @@ else:
     if args.format == 'csv':
         adata = sc.read_csv(args.input)
     elif args.format == '10x':
-        adata = sc.read_10x_mtx(args.input, var_names='gene_symbols', cache=True)
+        adata = sc.read_10x_mtx(args.input, var_names='gene_symbols', cache=True, prefix=args.prefix)
     adata.var_names_make_unique()
 
     if not args.metadata is None:
