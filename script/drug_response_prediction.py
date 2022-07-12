@@ -163,7 +163,7 @@ class Drug_Response:
             selected_drugs = []
             df_tmp = df.reset_index().set_index('Drug Name').iloc[:, 1:]
             for cluster in sorted([x for x in df_tmp.columns], key=int):
-                for drug_name in df_tmp.sort_values(by=cluster).index[:n_drug].values:
+                for drug_name in df_tmp.sort_values(by=cluster, ascending=False).index[:n_drug].values:
                     if drug_name not in selected_drugs:
                         selected_drugs.append(drug_name)
             df_tmp = df_tmp.loc[selected_drugs, :]
@@ -184,7 +184,7 @@ class Drug_Response:
 
         else:
             fig, ax = plt.subplots(figsize=(df.shape[1], int(n_drug*df.shape[1]/2))) 
-            sns.heatmap(select_drug(df, n_drug), cmap='Blues', \
+            sns.heatmap(select_drug(df, n_drug), cmap='Reds', \
                         linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': 'Drug Sensitivity'}, ax=ax, vmin=0, vmax=1)
             ax.set_xlabel('Cluster', fontsize=20)
             ax.set_ylabel('Drug', fontsize=20)
