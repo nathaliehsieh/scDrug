@@ -183,7 +183,7 @@ class Drug_Response:
             plt.close()
 
         else:
-            fig, ax = plt.subplots(figsize=(df.shape[1], int(n_drug*df.shape[1]/2))) 
+            fig, ax = plt.subplots(figsize=(df.shape[1], int(n_drug*df.shape[1]/5))) 
             sns.heatmap(select_drug(df, n_drug), cmap='Reds', \
                         linewidths=0.5, linecolor='lightgrey', cbar=True, cbar_kws={'shrink': .2, 'label': 'Drug Sensitivity'}, ax=ax, vmin=0, vmax=1)
             ax.set_xlabel('Cluster', fontsize=20)
