@@ -12,12 +12,21 @@ parser.add_argument('-c', '--clusters', default=None, type=str, help='perform co
 parser.add_argument("-u", "--username", required=True, help="email address registered on CIBERSORTx website")
 parser.add_argument("-t", "--token", required=True, help="token obtained from CIBERSORTx website")
 parser.add_argument("--celltype", default=None, help="choose a cell line from the options. If no name is provided, we will automatically determine the cell type. Options:  A375 (malignant melanoma),  A549 (non-small cell lung carcinoma),  HCC515 (non-small cell lung adenocarcinoma),  HEPG2 (hepatocellular carcinoma), HT29 (colorectal adenocarcinoma),  MCF7 (breast adenocarcinoma),  PC3 (prostate adenocarcinoma),  YAPC (Pancreatic carcinoma)")
+parser.add_argument("--develop", action="store_true", help="Only for development version.")
 
 args = parser.parse_args()
 
 data_path = '/scDrug/data/'
 
-function = "docker run --rm --name cibersortx-fractions \
+if args.develop:
+    function = "/src/CIBERSORTxFractions \
+          -v {input_dir}:/src/data -v {output_dir}:/src/outdir \
+          cibersortx/fractions --username {username} --token {token} \
+          --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(
+          input_dir=data_path, output_dir=data_path, 
+          username=args.username, token=args.token)
+else:
+    function = "docker run --rm --name cibersortx-fractions \
           -v {input_dir}:/src/data -v {output_dir}:/src/outdir \
           cibersortx/fractions --username {username} --token {token} \
           --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(
@@ -62,8 +71,6 @@ if not args.celltype:
     cellline_gep = pd.read_csv(data_path + 'bk_2021_gep.csv', sep=',', index_col=0)
     mutual_genes = [x for x in average_gep.index if x in cellline_gep.index]
     mutual_genes = find_deg(cellline_gep.loc[mutual_genes,:])
-
-
 
     max_p = float('-inf')
     for i, c in enumerate(cellline_gep.columns):
