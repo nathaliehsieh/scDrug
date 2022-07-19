@@ -7,6 +7,8 @@ parser = argparse.ArgumentParser(description="impute the fractions of previous i
 
 parser.add_argument("-i", "--input", required=True, help="path to input single-cell GEP file")
 parser.add_argument("-o", "--output", default='./', help="path to output directory, default='./'")
+parser.add_argument("-l", "--lincs",default='/scDrug/data/', help="path to LINCS data directory")
+parser.add_argument('-c', '--clusters', default=None, type=str, help='perform combined treatment prediction on specified clusters, e.g. \'1,3,8,9\'')
 parser.add_argument("-u", "--username", required=True, help="email address registered on CIBERSORTx website")
 parser.add_argument("-t", "--token", required=True, help="token obtained from CIBERSORTx website")
 parser.add_argument("--celltype", default=None, help="choose a cell line from the options. If no name is provided, we will automatically determine the cell type. Options:  A375 (malignant melanoma),  A549 (non-small cell lung carcinoma),  HCC515 (non-small cell lung adenocarcinoma),  HEPG2 (hepatocellular carcinoma), HT29 (colorectal adenocarcinoma),  MCF7 (breast adenocarcinoma),  PC3 (prostate adenocarcinoma),  YAPC (Pancreatic carcinoma)")
@@ -26,8 +28,19 @@ function = "docker run --rm --name cibersortx-fractions \
 cell = ''
 if not os.path.exists(args.input):
     sys.exit("The input path does not exist.")
+else:
+    infile = pd.read_csv(args.input, delimiter='\t', index_col=0, header=0)
+if not os.path.exists(args.lincs):
+    sys.exit("The path to LIINCS files does not exist.")
 if not os.path.exists(args.output):
     os.makedirs(args.output)
+if args.clusters:
+    clusters = [x.strip() for x in args.clusters.split(',')]
+    selected_cols = [x for x in infile.columns if x.rsplit('.',1)[0] in clusters]
+    infile = infile.loc[:, selected_cols]
+    args.input = '{}_tmp.txt'.format(args.input.rsplit('.',1)[0])
+    infile.to_csv(args.input, sep='\t')
+
 if not args.celltype:
     # automatically determine the cell line
     from scipy.stats import pearsonr
@@ -45,10 +58,12 @@ if not args.celltype:
         return set(deg_list)
 
     print("determing the cell line...")
-    average_gep = np.log2(pd.read_csv(args.input, delimiter='\t', index_col=0, header=0).mean(axis=1)+1)
+    average_gep = np.log2(infile.mean(axis=1)+1)
     cellline_gep = pd.read_csv(data_path + 'bk_2021_gep.csv', sep=',', index_col=0)
     mutual_genes = [x for x in average_gep.index if x in cellline_gep.index]
     mutual_genes = find_deg(cellline_gep.loc[mutual_genes,:])
+
+
 
     max_p = float('-inf')
     for i, c in enumerate(cellline_gep.columns):
@@ -83,9 +98,9 @@ if not os.path.isfile(bulk_path):
                 with gzip.open(filename, 'rb') as f_in:
                     with open(filename.rsplit('.',1)[0], 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-    file_inst = data_path + 'GSE70138_Broad_LINCS_inst_info_2017-03-06.txt.gz'
-    file_sig = data_path + 'GSE70138_Broad_LINCS_gene_info_2017-03-06.txt.gz'
-    file_gctx = data_path + 'GSE70138_Broad_LINCS_Level3_INF_mlr12k_n345976x12328_2017-03-06.gctx.gz'
+    file_inst = args.lincs + 'GSE70138_Broad_LINCS_inst_info_2017-03-06.txt.gz'
+    file_sig = args.lincs + 'GSE70138_Broad_LINCS_gene_info_2017-03-06.txt.gz'
+    file_gctx = args.lincs + 'GSE70138_Broad_LINCS_Level3_INF_mlr12k_n345976x12328_2017-03-06.gctx.gz'
     downloadFromGEO(file_inst, 'https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138%5FBroad%5FLINCS%5Finst%5Finfo%5F2017%2D03%2D06%2Etxt%2Egz')
     downloadFromGEO(file_sig, 'https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138%5FBroad%5FLINCS%5Fgene%5Finfo%5F2017%2D03%2D06%2Etxt%2Egz')
     downloadFromGEO(file_gctx, 'https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138%5FBroad%5FLINCS%5FLevel3%5FINF%5Fmlr12k%5Fn345976x12328%5F2017%2D03%2D06%2Egctx%2Egz')

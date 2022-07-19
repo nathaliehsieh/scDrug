@@ -274,6 +274,8 @@ pp = PdfPages(pdfname)
 useraw = False
 if args.format == 'h5ad':
     adata = sc.read(args.input)
+    if not args.metadata is None:
+        adata.obs = adata.obs.merge(metadata_df, left_index=True, right_index=True)
     if args.clusters:
         clusters = [x.strip() for x in args.clusters.split(',')]
         adata = adata[adata.obs['louvain'].isin(clusters)]
@@ -281,9 +283,7 @@ if args.format == 'h5ad':
         if adata.raw:
             useraw = True
             adata = adata.raw.to_adata()
-    if not args.metadata is None:
-        adata.obs = adata.obs.merge(metadata_df, left_index=True, right_index=True)
-    adata_GEP = adata.raw.to_adata()
+            adata_GEP = adata.copy()
 
 else:
     if args.format == 'csv':
@@ -428,66 +428,66 @@ if not args.batch is None:
 
 groups = sorted(adata.obs['louvain'].unique(), key=int)
 if args.annotation:
-    print('Cell type annotation...')
-    
-    # Export csv used by scMatch
-    mat = np.zeros((len(adata.raw.var.index), len(groups)), dtype=float)
-    for group in groups:
-        mat[: , int(group)] = adata.raw.X[adata.obs['louvain']==group].mean(axis=0)
-    dat = pd.DataFrame(mat, index = adata.raw.var.index, columns = groups)
-    dat.to_csv(os.path.join(args.output, 'cluster_mean_exp.csv'))
-    
-    os.system('python /opt/scMatch/scMatch.py --refDS /opt/scMatch/refDB/FANTOM5 \
-              --dFormat csv --testDS {} --coreNum {}'.format(
-              os.path.join(args.output, 'cluster_mean_exp.csv'), args.cpus))
-    
-    # Cell annotation result
-    scMatch_cluster_df = pd.read_csv(os.path.join(args.output, 'cluster_mean_exp') + '/annotation_result_keep_all_genes/human_Spearman_top_ann.csv')
-    scMatch_cluster_names = [group + " " + scMatch_cluster_df.loc[scMatch_cluster_df['cell']==int(group)]\
-                              ['cell type'].tolist()[0] for group in groups]
-    adata.obs['cell_type'] = adata.obs['louvain'].cat.rename_categories(scMatch_cluster_names)
-    scMatch_candidate_df = pd.read_excel(os.path.join(args.output, 'cluster_mean_exp') + '/annotation_result_keep_all_genes/human_Spearman.xlsx', skiprows=4, header=None, index_col=0)
-    for i in range(len(scMatch_candidate_df.columns)):
-        if i%2 == 0:
-            scMatch_candidate_df.iloc[:, i] = [x.split(',',1)[0].split(':',1)[0] for x in scMatch_candidate_df.iloc[:, i]]
-    dict_candidates = {}
-    for i in range(int(len(scMatch_candidate_df.columns)/2)):
-        candidates = list(dict.fromkeys(scMatch_candidate_df.iloc[:5, i*2]))
-        idx = 5
-        while len(candidates) < 5:
-            cell = scMatch_candidate_df.iloc[idx, i*2]
-            if not cell in candidates:
-                candidates.append(cell)
-            idx += 1
-        dict_candidates[str(i)] = candidates
-    df_candidate = pd.DataFrame(dict_candidates).T.reset_index().rename(columns={'index':'cluster'})
-    del scMatch_candidate_df
+    if not adata.raw:
+        print('Skip annotation since the process needs the expression data for all genes.')
+    else:
+        print('Cell type annotation...')
+        
+        # Export csv used by scMatch
+        mat = np.zeros((len(adata.raw.var.index), len(groups)), dtype=float)
+        for group in groups:
+            mat[: , int(group)] = adata.raw.X[adata.obs['louvain']==group].mean(axis=0)
+        dat = pd.DataFrame(mat, index = adata.raw.var.index, columns = groups)
+        dat.to_csv(os.path.join(args.output, 'cluster_mean_exp.csv'))
+        
+        os.system('python /opt/scMatch/scMatch.py --refDS /opt/scMatch/refDB/FANTOM5 \
+                --dFormat csv --testDS {} --coreNum {}'.format(
+                os.path.join(args.output, 'cluster_mean_exp.csv'), args.cpus))
+        
+        # Cell annotation result
+        scMatch_cluster_df = pd.read_csv(os.path.join(args.output, 'cluster_mean_exp') + '/annotation_result_keep_all_genes/human_Spearman_top_ann.csv')
+        scMatch_cluster_names = [group + " " + scMatch_cluster_df.loc[scMatch_cluster_df['cell']==int(group)]\
+                                ['cell type'].tolist()[0] for group in groups]
+        adata.obs['cell_type'] = adata.obs['louvain'].cat.rename_categories(scMatch_cluster_names)
+        scMatch_candidate_df = pd.read_excel(os.path.join(args.output, 'cluster_mean_exp') + '/annotation_result_keep_all_genes/human_Spearman.xlsx', skiprows=4, header=None, index_col=0)
+        for i in range(len(scMatch_candidate_df.columns)):
+            if i%2 == 0:
+                scMatch_candidate_df.iloc[:, i] = [x.split(',',1)[0].split(':',1)[0] for x in scMatch_candidate_df.iloc[:, i]]
+        dict_candidates = {}
+        for i in range(int(len(scMatch_candidate_df.columns)/2)):
+            candidates = list(dict.fromkeys(scMatch_candidate_df.iloc[:5, i*2]))
+            idx = 5
+            while len(candidates) < 5:
+                cell = scMatch_candidate_df.iloc[idx, i*2]
+                if not cell in candidates:
+                    candidates.append(cell)
+                idx += 1
+            dict_candidates[str(i)] = candidates
+        df_candidate = pd.DataFrame(dict_candidates).T.reset_index().rename(columns={'index':'cluster'})
+        del scMatch_candidate_df
 
-    fig = sc.pl.umap(adata, color=['cell_type'], use_raw=False, show=False, return_fig=True, title='cell type')
-    pp.savefig(fig, bbox_inches='tight')
-    plt.close()
+        fig = sc.pl.umap(adata, color=['cell_type'], use_raw=False, show=False, return_fig=True, title='cell type')
+        pp.savefig(fig, bbox_inches='tight')
+        plt.close()
 
-    fig, ax = plt.subplots()
-    # hide axes
-    fig.patch.set_visible(False)
-    ax.axis('off')
-    ax.axis('tight')
-    table = ax.table(cellText=df_candidate.values, colLabels=df_candidate.columns, loc='center')
-    # table.auto_set_font_size(False)
-    # table.set_fontsize(8)
-    table.auto_set_column_width(col=list(range(len(df_candidate.columns))))
+        fig, ax = plt.subplots()
+        # hide axes
+        fig.patch.set_visible(False)
+        ax.axis('off')
+        ax.axis('tight')
+        table = ax.table(cellText=df_candidate.values, colLabels=df_candidate.columns, loc='center')
+        # table.auto_set_font_size(False)
+        # table.set_fontsize(8)
+        table.auto_set_column_width(col=list(range(len(df_candidate.columns))))
 
-    for cell in table._cells:
-        if cell[0] == 0:
-            table._cells[cell].set_color('lightblue')
-            table._cells[cell].set_height(.05)
-    
-    ax.set_title('Top 5 annotation')
-    pp.savefig(fig, bbox_inches='tight')
-    plt.close('all')
-
-
-    
+        for cell in table._cells:
+            if cell[0] == 0:
+                table._cells[cell].set_color('lightblue')
+                table._cells[cell].set_height(.05)
+        
+        ax.set_title('Top 5 annotation')
+        pp.savefig(fig, bbox_inches='tight')
+        plt.close('all')
 
 
 ## Finding differentially expressed genes
@@ -591,17 +591,12 @@ if args.survival:
     df_hazard.to_csv(f'{args.output}/HR_{treatment_status}.csv')
 
 pp.close()
+if args.clusters and os.path.isfile(results_file):
+    results_file = '{}.sub.h5ad'.format(results_file.rsplit('.',1)[0])
 adata.write(results_file)
 
 # GEP format
-if args.id: # select the tumor clusters with hr value 
-    harm_clusters = df_hazard[(df_hazard['exp(coef)']>0) & (df_hazard['p']<=0.05)]['cell type'].tolist()
-    if len(harm_clusters) < 2:
-        sys.exit('The number of the cell types with a Hazard Ratio greater than 0 and passed the threshold (0.05) is less than 2, which is below the requirement for cell type abundance prediction.')
-    else:
-        adata_GEP = adata_GEP[adata.obs['louvain'].isin(harm_clusters)]
-        adata.write('{}_filtered.h5ad'.format(results_file.rsplit('.',1)[0]))
-if args.GEP:
+if args.GEP and adata_GEP:
     print('Exporting GEP...')
     sc.pp.normalize_total(adata_GEP, target_sum=1e6)
     mat = adata_GEP.X.transpose()
