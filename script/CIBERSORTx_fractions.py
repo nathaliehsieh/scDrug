@@ -61,7 +61,7 @@ if not args.celltype:
 
     print("determing the cell line...")
     average_gep = np.log2(infile.mean(axis=1)+1)
-    cellline_gep = pd.read_csv(bk_gep_path + 'bk_2021_gep.csv', sep=',', index_col=0)
+    cellline_gep = pd.read_csv(os.path.join(bk_gep_path, 'bk_2021_gep.csv'), sep=',', index_col=0)
     mutual_genes = [x for x in average_gep.index if x in cellline_gep.index]
     mutual_genes = find_deg(cellline_gep.loc[mutual_genes,:])
 
