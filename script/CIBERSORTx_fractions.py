@@ -16,16 +16,15 @@ parser.add_argument("--develop", action="store_true", help="Only for development
 
 args = parser.parse_args()
 
-data_path = '/scDrug/data/'
 
 if args.develop:
-    function = "/src/CIBERSORTxFractions \
-          -v {input_dir}:/src/data -v {output_dir}:/src/outdir \
-          cibersortx/fractions --username {username} --token {token} \
-          --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(
-          input_dir=data_path, output_dir=data_path, 
-          username=args.username, token=args.token)
+    data_path = '/src/data/'
+    function = f"/src/CIBERSORTxFractions \
+          --username {args.username} --token {args.token} \
+          --outdir {args.output} \
+          --single_cell TRUE --fraction 0 --rmbatchSmode TRUE "
 else:
+    data_path = '/scDrug/data/'
     function = "docker run --rm --name cibersortx-fractions \
           -v {input_dir}:/src/data -v {output_dir}:/src/outdir \
           cibersortx/fractions --username {username} --token {token} \
