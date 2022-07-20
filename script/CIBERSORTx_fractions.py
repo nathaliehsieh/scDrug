@@ -72,12 +72,12 @@ if not args.celltype:
             max_p = p
             cell = c
     print("selected cell type = {}".format(cell))
-    bulk_path = bk_gep_path + 'LINCS_L1000_GEP_{}.txt'.format(cell)
+    bulk_path = os.path.join(bk_gep_path, 'LINCS_L1000_GEP_{}.txt'.format(cell))
 else:
     if not args.celltype in ['A375','A549','HCC515','HEPG2','HT29','MCF7','PC3','YAPC']:
         sys.exit("Unacceptable cell type.")
     cell = args.celltype
-    bulk_path = bk_gep_path + 'LINCS_L1000_GEP_{}.txt'.format(args.celltype)
+    bulk_path = os.path.join(bk_gep_path,'LINCS_L1000_GEP_{}.txt'.format(args.celltype))
 
 if not os.path.isfile(bulk_path):
     from cmapPy.pandasGEXpress.parse import parse
@@ -98,9 +98,9 @@ if not os.path.isfile(bulk_path):
                 with gzip.open(filename, 'rb') as f_in:
                     with open(filename.rsplit('.',1)[0], 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-    file_inst = args.lincs + 'GSE70138_Broad_LINCS_inst_info_2017-03-06.txt.gz'
-    file_sig = args.lincs + 'GSE70138_Broad_LINCS_gene_info_2017-03-06.txt.gz'
-    file_gctx = args.lincs + 'GSE70138_Broad_LINCS_Level3_INF_mlr12k_n345976x12328_2017-03-06.gctx.gz'
+    file_inst = os.path.join(args.lincs, 'GSE70138_Broad_LINCS_inst_info_2017-03-06.txt.gz')
+    file_sig = os.path.join(args.lincs, 'GSE70138_Broad_LINCS_gene_info_2017-03-06.txt.gz')
+    file_gctx = os.path.join(args.lincs, 'GSE70138_Broad_LINCS_Level3_INF_mlr12k_n345976x12328_2017-03-06.gctx.gz')
     downloadFromGEO(file_inst, 'https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138%5FBroad%5FLINCS%5Finst%5Finfo%5F2017%2D03%2D06%2Etxt%2Egz')
     downloadFromGEO(file_sig, 'https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138%5FBroad%5FLINCS%5Fgene%5Finfo%5F2017%2D03%2D06%2Etxt%2Egz')
     downloadFromGEO(file_gctx, 'https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138%5FBroad%5FLINCS%5FLevel3%5FINF%5Fmlr12k%5Fn345976x12328%5F2017%2D03%2D06%2Egctx%2Egz')
