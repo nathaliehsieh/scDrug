@@ -19,9 +19,11 @@ args = parser.parse_args()
 
 if args.develop:
     data_path = '/src/data/'
+    bk_gep_path = args.lincs
     function = "/src/CIBERSORTxFractions --username {} --token {} --outdir {} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE".format(args.username, args.token, args.output)
 else:
     data_path = '/scDrug/data/'
+    bk_gep_path = data_path
     function = "docker run --rm --name cibersortx-fractions -v {input_dir}:/src/data -v {output_dir}:/src/outdir cibersortx/fractions --username {username} --token {token} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(input_dir=data_path, output_dir=data_path, username=args.username, token=args.token)
 
 ## Check arguments
@@ -59,7 +61,7 @@ if not args.celltype:
 
     print("determing the cell line...")
     average_gep = np.log2(infile.mean(axis=1)+1)
-    cellline_gep = pd.read_csv(data_path + 'bk_2021_gep.csv', sep=',', index_col=0)
+    cellline_gep = pd.read_csv(bk_gep_path + 'bk_2021_gep.csv', sep=',', index_col=0)
     mutual_genes = [x for x in average_gep.index if x in cellline_gep.index]
     mutual_genes = find_deg(cellline_gep.loc[mutual_genes,:])
 
@@ -70,12 +72,12 @@ if not args.celltype:
             max_p = p
             cell = c
     print("selected cell type = {}".format(cell))
-    bulk_path = data_path + 'LINCS_L1000_GEP_{}.txt'.format(cell)
+    bulk_path = bk_gep_path + 'LINCS_L1000_GEP_{}.txt'.format(cell)
 else:
     if not args.celltype in ['A375','A549','HCC515','HEPG2','HT29','MCF7','PC3','YAPC']:
         sys.exit("Unacceptable cell type.")
     cell = args.celltype
-    bulk_path = data_path + 'LINCS_L1000_GEP_{}.txt'.format(args.celltype)
+    bulk_path = bk_gep_path + 'LINCS_L1000_GEP_{}.txt'.format(args.celltype)
 
 if not os.path.isfile(bulk_path):
     from cmapPy.pandasGEXpress.parse import parse
@@ -119,12 +121,18 @@ if not os.path.isfile(bulk_path):
     exp_df = 2**max_df
     exp_df.to_csv(bulk_path, sep='\t')
 
-refsample = os.path.basename(args.input)
-mixture = os.path.basename(bulk_path)
-function += "--refsample {} --mixture {}".format(refsample, mixture)
 
-
-## Run CIBERSORTx fractions
-os.system("mv {} {}".format(args.input, data_path + refsample))
-os.system(function)
-os.system("mv {} {}".format(data_path + refsample, args.input))
+if args.develop:
+    refsample = args.input
+    mixture = bulk_path
+    function += "--refsample {} --mixture {}".format(refsample, mixture)
+    ## Run CIBERSORTx fractions
+    os.system(function)
+else:
+    refsample = os.path.basename(args.input)
+    mixture = os.path.basename(bulk_path)
+    function += "--refsample {} --mixture {}".format(refsample, mixture)
+    ## Run CIBERSORTx fractions
+    os.system("mv {} {}".format(args.input, data_path + refsample))
+    os.system(function)
+    os.system("mv {} {}".format(data_path + refsample, args.input))
