@@ -19,18 +19,10 @@ args = parser.parse_args()
 
 if args.develop:
     data_path = '/src/data/'
-    function = f"/src/CIBERSORTxFractions \
-          --username {args.username} --token {args.token} \
-          --outdir {args.output} \
-          --single_cell TRUE --fraction 0 --rmbatchSmode TRUE "
+    function = "/src/CIBERSORTxFractions --username {} --token {} --outdir {} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE".format(args.username, args.token, args.output)
 else:
     data_path = '/scDrug/data/'
-    function = "docker run --rm --name cibersortx-fractions \
-          -v {input_dir}:/src/data -v {output_dir}:/src/outdir \
-          cibersortx/fractions --username {username} --token {token} \
-          --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(
-          input_dir=data_path, output_dir=data_path, 
-          username=args.username, token=args.token)
+    function = "docker run --rm --name cibersortx-fractions -v {input_dir}:/src/data -v {output_dir}:/src/outdir cibersortx/fractions --username {username} --token {token} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(input_dir=data_path, output_dir=data_path, username=args.username, token=args.token)
 
 ## Check arguments
 cell = ''
