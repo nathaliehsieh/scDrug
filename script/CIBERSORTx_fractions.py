@@ -122,17 +122,16 @@ if not os.path.isfile(bulk_path):
     exp_df.to_csv(bulk_path, sep='\t')
 
 
+refsample = os.path.basename(args.input)
+mixture = os.path.basename(bulk_path)
+function += "--refsample {} --mixture {}".format(refsample, mixture)
+
+## Run CIBERSORTx fractions
 if args.develop:
-    refsample = args.input
-    mixture = bulk_path
-    function += "--refsample {} --mixture {}".format(refsample, mixture)
-    ## Run CIBERSORTx fractions
+    os.system("cp {} {}".format(args.input, data_path))
+    os.system("cp {} {}".format(bulk_path, data_path))
     os.system(function)
 else:
-    refsample = os.path.basename(args.input)
-    mixture = os.path.basename(bulk_path)
-    function += "--refsample {} --mixture {}".format(refsample, mixture)
-    ## Run CIBERSORTx fractions
-    os.system("mv {} {}".format(args.input, data_path + refsample))
+    os.system("mv {} {}".format(args.input, os.path.join(data_path, refsample)))
     os.system(function)
-    os.system("mv {} {}".format(data_path + refsample, args.input))
+    os.system("mv {} {}".format(os.path.join(data_path, refsample), args.input))
