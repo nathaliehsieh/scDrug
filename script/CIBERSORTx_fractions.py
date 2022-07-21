@@ -20,7 +20,7 @@ args = parser.parse_args()
 if args.develop:
     data_path = '/src/data/'
     bk_gep_path = args.lincs
-    function = "/src/CIBERSORTxFractions --username {} --token {} --outdir {} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE".format(args.username, args.token, args.output)
+    function = "/src/CIBERSORTxFractions --username {} --token {} --outdir {} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(args.username, args.token, args.output)
 else:
     data_path = '/scDrug/data/'
     bk_gep_path = data_path
@@ -124,7 +124,7 @@ if not os.path.isfile(bulk_path):
 
 refsample = os.path.basename(args.input)
 mixture = os.path.basename(bulk_path)
-function += "--refsample {} --mixture {}".format(refsample, mixture)
+function += " --refsample {} --mixture {} ".format(refsample, mixture)
 
 ## Run CIBERSORTx fractions
 if args.develop:
