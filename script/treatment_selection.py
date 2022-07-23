@@ -48,10 +48,13 @@ def append_df_effect(df, drug_id, result_effect):
 
 
 def read_metadata(filename, celltype=None):
-    if('.csv' in filename):
+    if '.csv' in filename:
         df_metadata = pd.read_csv(filename, sep=',', index_col=0)
     else:
-        df_metadata = pd.read_csv(filename, sep='\t', index_col=0)
+        if '.gz' in filename:
+            df_metadata = pd.read_csv(filename, sep='\t', index_col=0, compression='gzip')
+        else:
+            df_metadata = pd.read_csv(filename, sep='\t', index_col=0)
 
     if celltype:
         df_metadata = df_metadata[df_metadata['cell_id'] == celltype]
