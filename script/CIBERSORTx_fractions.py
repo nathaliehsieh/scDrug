@@ -20,7 +20,7 @@ args = parser.parse_args()
 if args.develop:
     data_path = '/src/data/'
     bk_gep_path = args.lincs
-    function = "/src/CIBERSORTxFractions --username {} --token {} --outdir {} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(args.username, args.token, args.output)
+    function = "/src/CIBERSORTxFractions --username {} --token {} --single_cell TRUE --fraction 0 --rmbatchSmode TRUE ".format(args.username, args.token)
 else:
     data_path = '/scDrug/data/'
     bk_gep_path = data_path
