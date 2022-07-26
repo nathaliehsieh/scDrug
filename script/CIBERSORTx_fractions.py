@@ -131,7 +131,7 @@ if args.develop:
     os.system("cp {} {}".format(args.input, data_path))
     os.system("cp {} {}".format(bulk_path, data_path))
     os.system(function)
-    os.system("mv {} {}".format(data_path, args.output))
+    os.system("mv {} {}".format('/src/outdir/CIBERSORTx_Adjusted.txt', args.output))
 else:
     os.system("mv {} {}".format(args.input, os.path.join(data_path, refsample)))
     os.system(function)
