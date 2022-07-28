@@ -26,6 +26,8 @@ def runGSEAPY(adata, group_by='louvain', gene_sets=['GO_Biological_Process_2021'
     import gseapy as gp
     from gseapy.plot import barplot
 
+    fig, ax = plt.subplots()
+    
     df_list = []
     cluster_list = []
     celltypes = sorted(adata.obs[group_by].unique())
