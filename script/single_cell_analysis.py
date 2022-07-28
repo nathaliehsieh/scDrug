@@ -280,10 +280,10 @@ if args.format == 'h5ad':
         clusters = [x.strip() for x in args.clusters.split(',')]
         adata = adata[adata.obs['louvain'].isin(clusters)]
         # get back to raw data if raw data existed
-        if adata.raw:
-            useraw = True
-            adata = adata.raw.to_adata()
-            adata_GEP = adata.copy()
+    if adata.raw:
+        useraw = True
+        adata = adata.raw.to_adata()
+        adata_GEP = adata.copy()
 
 else:
     if args.format == 'csv':
