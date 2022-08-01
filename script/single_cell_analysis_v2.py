@@ -191,9 +191,9 @@ def readFile():
     # read main file
     if args.format == 'h5ad':
         adata = sc.read(args.input)
-        if adata.raw:
+        if not adata.raw is None:
             adata = adata.raw.to_adata()
-        if adata.obs and args.metadata:
+        if not adata.obs is None and not args.metadata is None:
             adata.obs = adata.obs.merge(metadata_df, left_index=True, right_index=True)
     elif args.format == 'csv':
         adata = sc.read_csv(args.input)
@@ -233,8 +233,9 @@ def preprocessing(adata):
     sc.pp.calculate_qc_metrics(adata, qc_vars=['mt'], percent_top=None, log1p=False, inplace=True)
     if not (adata.obs.pct_counts_mt == 0).all():
         adata = adata[adata.obs.pct_counts_mt < 30, :]
+    adata_GEP = None
     if args.GEP: 
-        writeGEP(adata.copy())
+        adata_GEP = adata.copy()
     sc.pp.normalize_total(adata, target_sum=1e4)
     sc.pp.log1p(adata)
     sc.pp.highly_variable_genes(adata)
@@ -243,7 +244,7 @@ def preprocessing(adata):
     sc.pp.regress_out(adata, ['total_counts', 'pct_counts_mt'])
     sc.pp.scale(adata)
     sc.tl.pca(adata, svd_solver='arpack')
-    return adata
+    return adata, adata_GEP
 
 def batchCorrect(adata):
     if args.batch in adata.obs.columns:
@@ -579,7 +580,7 @@ results_file = os.path.join(args.output, 'scanpyobj.h5ad')
 
 # Main process
 adata = readFile()
-adata = preprocessing(adata)
+adata, adata_GEP = preprocessing(adata)
 if args.batch:
     adata = batchCorrect(adata)
 adata = clustering(adata)
@@ -590,8 +591,9 @@ if args.gsea:
     runGSEAPY(adata)
 if args.survival:
     adata = survivalAnalysis(adata, clinicalpath, gencode)
-
 if args.clusters and os.path.isfile(results_file):
     results_file = '{}.sub.h5ad'.format(results_file.rsplit('.',1)[0])
 adata.write(results_file)
+if args.GEP: 
+    writeGEP(adata_GEP)
 pp.close()
