@@ -249,6 +249,7 @@ def preprocessing(adata):
 def batchCorrect(adata):
     if args.batch in adata.obs.columns:
         print('Batch correction...')
+        adata.obs[args.batch] = adata.obs[args.batch].astype(str)
         sc.external.pp.harmony_integrate(adata, args.batch, adjusted_basis='X_pca')
     else:
         print('Skip batch correction...')
@@ -558,18 +559,18 @@ else:
 if not os.path.isdir(args.output):
     sys.exit("The output directory does not exist.")
 
-# check options
-# Survival Analysis
-if not os.path.isdir(args.tcga):
-        sys.exit("The path to TCGA files does not exist.")
-if not os.path.isfile(f'{args.tcga}/clinical.tsv'):
-    sys.exit("The TCGA clinical file does not exist.")
-else:
-    clinicalpath = f'{args.tcga}/clinical.tsv'
-if not os.path.isfile(f'{args.tcga}/gencode.v22.annotation.id.name.gtf'):
-    sys.exit("The gencode file for id conversion does not exist.")
-else:
-    gencode = f'{args.tcga}/gencode.v22.annotation.id.name.gtf'
+# check option
+if args.survival:
+    if not os.path.isdir(args.tcga):
+            sys.exit("The path to TCGA files does not exist.")
+    if not os.path.isfile(f'{args.tcga}/clinical.tsv'):
+        sys.exit("The TCGA clinical file does not exist.")
+    else:
+        clinicalpath = f'{args.tcga}/clinical.tsv'
+    if not os.path.isfile(f'{args.tcga}/gencode.v22.annotation.id.name.gtf'):
+        sys.exit("The gencode file for id conversion does not exist.")
+    else:
+        gencode = f'{args.tcga}/gencode.v22.annotation.id.name.gtf'
 
 # read input file
 global pdfname, pp, results_file
