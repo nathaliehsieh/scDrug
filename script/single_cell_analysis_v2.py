@@ -339,6 +339,7 @@ def clustering(adata):
         fig = sc.pl.umap(adata, color=[args.batch], use_raw=False, show=False, return_fig=True, title=args.batch)
         pp.savefig(fig, bbox_inches='tight')
         plt.close()
+    return adata
 
 def annotation(adata):
     groups = sorted(adata.obs['louvain'].unique(), key=int)
@@ -403,7 +404,7 @@ def annotation(adata):
         pp.savefig(fig, bbox_inches='tight')
         plt.close('all')
 
-        return adata
+    return adata
 
 def findDEG(adata):
     # Finding differentially expressed genes
