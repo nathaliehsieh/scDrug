@@ -341,8 +341,7 @@ def clustering(adata):
         plt.close()
     return adata
 
-def annotation(adata):
-    groups = sorted(adata.obs['louvain'].unique(), key=int)
+def annotation(adata, groups):
     if not adata.raw:
         print('Skip annotation since the process needs the expression data for all genes.')
     else:
@@ -406,7 +405,7 @@ def annotation(adata):
 
     return adata
 
-def findDEG(adata):
+def findDEG(adata, groups):
     # Finding differentially expressed genes
     print('Finding Differentially Expressed Genes...')
     method = "t-test"
@@ -586,9 +585,10 @@ adata, adata_GEP = preprocessing(adata)
 if args.batch:
     adata = batchCorrect(adata)
 adata = clustering(adata)
+groups = sorted(adata.obs['louvain'].unique(), key=int)
 if args.annotation:
-    adata =  annotation(adata)
-adata = findDEG(adata)
+    adata =  annotation(adata, groups)
+adata = findDEG(adata, groups)
 if args.gsea:
     runGSEAPY(adata)
 if args.survival:
